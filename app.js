@@ -21,14 +21,39 @@ const app = express();
 app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, "views"))
 
+app.use(express.urlencoded({extended:true}))
+
 app.get("/", (req, res) => {
     res.render("home");
 })
 
-app.get("/makecampground", async (req, res) => {
+/* app.get("/makecampground", async (req, res) => {
     const camp = new Campground({title: "My Backyard", description: "cheap camping!"});
     await camp.save();
     res.send(camp);
+}) */
+
+app.get("/campgrounds", async (req, res) => {
+    const campgrounds = await Campground.find({});
+    res.render('campgrounds/index', {campgrounds})
+})
+
+// This is the form to make a new campground, this should come first compared to /campgrounds/:id otherwise we are directed here
+app.get("/campgrounds/new", (req, res) => {
+    res.render("campgrounds/new")
+})
+
+app.post("/campgrounds", async (req,res) => {
+    //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing app.use(express.urlencoded) 
+    const campground = new Campground(req.body.campground);
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`)
+})
+
+app.get("/campgrounds/:id", async (req, res) =>{
+    const campground = await Campground.findById(req.params.id);
+    res.render("campgrounds/show", {campground})
+
 })
 
 app.listen(3000, () => {
