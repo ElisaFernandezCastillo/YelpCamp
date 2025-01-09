@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const ejsMate = require('ejs-mate');
+const Joi = require("joi");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError")
 const methodOverride = require("method-override");
@@ -50,8 +51,23 @@ app.get("/campgrounds/new", (req, res) => {
 })
 
 app.post("/campgrounds", catchAsync(async (req,res, next) => {
-    if(!req.body.campground) throw new ExpressError("Invalid Campground", 400);
-    //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing app.use(express.urlencoded) 
+    // if(!req.body.campground) throw new ExpressError("Invalid Campground", 400);
+    //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing app.use(express.urlencoded)
+    // The validations of the objects we recieve are going to be made using the JOI library
+    const campgroundSchema =  Joi.object({
+        campground: Joi.object({
+            title: Joi.string().required(),
+            price: Joi.number().required().min(0),
+            image: Joi.string().required(),
+            location: Joi.string().required(), 
+            description: Joi.string().required()
+        }).required()
+    })
+    const {error} = campgroundSchema.validate(req.body);
+    if(error){
+        const msg = error.details.map(el => el.message).join(",")
+        throw new ExpressError(msg, 400)
+    }
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
