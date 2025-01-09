@@ -2,9 +2,10 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const ejsMate = require('ejs-mate');
-const catchAsync = require("./utils/catchAsync")
-const methodOverride = require("method-override")
-const Campground = require("./models/campground")
+const catchAsync = require("./utils/catchAsync");
+const ExpressError = require("./utils/ExpressError")
+const methodOverride = require("method-override");
+const Campground = require("./models/campground");
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp", {
     useNewUrlParser: true,
@@ -48,6 +49,7 @@ app.get("/campgrounds/new", (req, res) => {
 })
 
 app.post("/campgrounds", catchAsync(async (req,res, next) => {
+    if(!req.body.campground) throw new ExpressError("Invalid Campground", 400);
     //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing app.use(express.urlencoded) 
     const campground = new Campground(req.body.campground);
     await campground.save();
@@ -78,8 +80,15 @@ app.delete("/campgrounds/:id", catchAsync(async (req, res) => {
     res.redirect("/campgrounds") 
 }))
 
+// A path that doesn't exist will end up here
+app.all("*", (req, res, next) => {
+    next(new ExpressError("Page Not Found!!", 404))
+})
+
+// All other errors that happend during the handling og the async functions will end up here
 app.use((err, req, res, next) => {
-    res.send("Something went wrong!")
+    const {statusCode = 500, message = "Something went wrong"} = err;
+    res.status(statusCode).send(message);
 })
 
 app.listen(3000, () => {
