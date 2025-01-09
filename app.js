@@ -6,6 +6,7 @@ const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError")
 const methodOverride = require("method-override");
 const Campground = require("./models/campground");
+const { error } = require("console");
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp", {
     useNewUrlParser: true,
@@ -87,8 +88,9 @@ app.all("*", (req, res, next) => {
 
 // All other errors that happend during the handling og the async functions will end up here
 app.use((err, req, res, next) => {
-    const {statusCode = 500, message = "Something went wrong"} = err;
-    res.status(statusCode).send(message);
+    const {statusCode = 500} = err;
+    if(!err.message) err.message = "Oh no, something went wrong!"
+    res.status(statusCode).render('error', { err });
 })
 
 app.listen(3000, () => {
