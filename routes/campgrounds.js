@@ -39,6 +39,7 @@ router.post("/", validateCampground, catchAsync(async (req,res, next) => {
     // The validations of the objects we recieve are going to be made using the JOI library
     const campground = new Campground(req.body.campground);
     await campground.save();
+    req.flash("success", "Successfully made a new campground!")
     res.redirect(`/campgrounds/${campground._id}`)
     
 }))

@@ -2,9 +2,12 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const ejsMate = require('ejs-mate');
+const session = require('express-session'); // we are going to use this for authentication and for flashing messages
+const flash = require("connect-flash");
 const ExpressError = require("./utils/ExpressError")
 const methodOverride = require("method-override");
 const { error } = require("console");
+
 
 const campgrounds = require("./routes/campgrounds")
 const reviews = require("./routes/reviews")
@@ -22,6 +25,16 @@ db.once("open", () => {
 });
 
 const app = express();
+const sessionConfig = {
+    secret: "thisshouldbeabettersecret!",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 *60 * 24 *7, //this is all in milliseconds
+        maxAge: 1000 * 60 *60 * 24 *7
+    }
+}
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs")
@@ -30,6 +43,14 @@ app.set("views", path.join(__dirname, "views"))
 app.use(express.urlencoded({extended:true}))
 app.use(methodOverride("_method"))
 app.use(express.static(path.join(__dirname, "public")))
+app.use(session(sessionConfig));
+app.use(flash());
+app.use((req, res, next) => {
+    // by using the locals we will have access to that information in the templates automatically. 
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+})
 
 
 app.use("/campgrounds", campgrounds);
