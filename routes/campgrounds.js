@@ -58,12 +58,14 @@ router.get("/:id/edit", catchAsync(async (req, res) => {
 router.put("/:id", validateCampground, catchAsync(async(req, res) => {
     const {id} = req.params;
     const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground}) // saving as an object in the EJS file edit.ejs allows us to access the object from the body
+    req.flash("success", "Successfully updated campground!")
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 
 router.delete("/:id", catchAsync(async (req, res) => {
     const {id} = req.params;
     await Campground.findByIdAndDelete(id);
+    req.flash("success", "Successfully deleted campground!")
     res.redirect("/campgrounds") 
 }))
 
