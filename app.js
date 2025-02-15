@@ -12,8 +12,9 @@ const User = require("./models/user")
 const { error } = require("console");
 
 
-const campgrounds = require("./routes/campgrounds")
-const reviews = require("./routes/reviews")
+const userRoutes = require("./routes/users")
+const campgroundRoutes = require("./routes/campgrounds")
+const reviewRoutes = require("./routes/reviews")
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp", {
     useNewUrlParser: true,
@@ -68,8 +69,9 @@ app.get("/fakeUser", async (req, res) => {
     res.send(newUser);
 })
 
-app.use("/campgrounds", campgrounds);
-app.use('/campgrounds/:id/reviews', reviews); //if we need access to this is on the router we have to use the mergeParams value in the router 
+app.use("/", userRoutes);
+app.use("/campgrounds", campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes); //if we need access to this is on the router we have to use the mergeParams value in the router 
 
 app.get("/", (req, res) => {
     res.render("home");
