@@ -6,6 +6,9 @@ const session = require('express-session'); // we are going to use this for auth
 const flash = require("connect-flash");
 const ExpressError = require("./utils/ExpressError")
 const methodOverride = require("method-override");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user")
 const { error } = require("console");
 
 
@@ -45,6 +48,13 @@ app.use(methodOverride("_method"))
 app.use(express.static(path.join(__dirname, "public")))
 app.use(session(sessionConfig));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req, res, next) => {
     // by using the locals we will have access to that information in the templates automatically. 
     res.locals.success = req.flash("success");
@@ -52,6 +62,11 @@ app.use((req, res, next) => {
     next();
 })
 
+app.get("/fakeUser", async (req, res) => {
+    const user = new User({email: "elisa.fc@gmail.com", username: "eli"})
+    const newUser = await User.register(user, "chicken"); //chicken is the password
+    res.send(newUser);
+})
 
 app.use("/campgrounds", campgrounds);
 app.use('/campgrounds/:id/reviews', reviews); //if we need access to this is on the router we have to use the mergeParams value in the router 
