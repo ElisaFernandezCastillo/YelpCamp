@@ -39,6 +39,7 @@ router.post("/", isLoggedIn, validateCampground, catchAsync(async (req,res, next
     //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing router.use(express.urlencoded)
     // The validations of the objects we recieve are going to be made using the JOI library
     const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
     await campground.save();
     req.flash("success", "Successfully made a new campground!")
     res.redirect(`/campgrounds/${campground._id}`)
@@ -46,7 +47,7 @@ router.post("/", isLoggedIn, validateCampground, catchAsync(async (req,res, next
 }))
 
 router.get("/:id", catchAsync(async (req, res) =>{
-    const campground = await Campground.findById(req.params.id).populate("reviews");
+    const campground = await Campground.findById(req.params.id).populate("reviews").populate("author");
     if(!campground){
         req.flash('error', "Cannot find that campground!")
         return res.redirect("/campgrounds")
