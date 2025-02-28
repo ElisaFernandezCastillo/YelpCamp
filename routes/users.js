@@ -6,14 +6,21 @@ const users = require("../controllers/users")
 const passport = require("passport");
 const { storeReturnTo } = require("../middleware");
 
-router.get("/register", users.renderRegister);
+router.route("/register")
+    .get(users.renderRegister)
+    .post(catchAsync(users.register));
 
-router.post("/register", catchAsync(users.register));
+router.route("/login")
+    .get(users.renderLogin)
+    .post(storeReturnTo, passport.authenticate("local", {failureFlash: true, failureRedirect: "/login"}), users.login)
+// router.get("/register", users.renderRegister);
 
-router.get("/login", users.renderLogin);
+// router.post("/register", catchAsync(users.register));
+
+// router.get("/login", users.renderLogin);
 
 // Instead of local we can use Facebook or Twitter
-router.post("/login", storeReturnTo, passport.authenticate("local", {failureFlash: true, failureRedirect: "/login"}), users.login)
+// router.post("/login", storeReturnTo, passport.authenticate("local", {failureFlash: true, failureRedirect: "/login"}), users.login)
 
 router.get("/logout", users.logout);
 

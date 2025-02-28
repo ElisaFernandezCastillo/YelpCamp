@@ -13,20 +13,30 @@ await camp.save();
 res.send(camp);
 }) */
 
-router.get("/", catchAsync(campgrounds.index));
+router.route("/")
+    .get(catchAsync(campgrounds.index))
+    .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+
+
+// router.get("/", catchAsync(campgrounds.index));
 
 // This is the form to make a new campground, this should come first compared to /campgrounds/:id otherwise we are directed here
 router.get("/new", isLoggedIn, campgrounds.renderNewForm);
 
 // we can do a validation of the campground at this level calling the validateCampground middleware
-router.post("/", isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground));
+// router.post("/", isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground));
 
-router.get("/:id", catchAsync(campgrounds.showCampground));
+router.route("/:id")
+    .get(catchAsync(campgrounds.showCampground))
+    .put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground))
+    .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground))
+
+// router.get("/:id", catchAsync(campgrounds.showCampground));
 
 router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditForm));
 
-router.put("/:id", isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground));
+// router.put("/:id", isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground));
 
-router.delete("/:id", isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
+// router.delete("/:id", isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
 
 module.exports = router;
