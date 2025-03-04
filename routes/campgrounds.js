@@ -4,6 +4,8 @@ const campgrounds = require("../controllers/campgrounds");
 const catchAsync = require("../utils/catchAsync");
 const Campground = require("../models/campground");
 const {isLoggedIn, isAuthor, validateCampground} = require("../middleware")
+const multer  = require('multer') // multer is used to be able to parse files that are uploaded via an HTML form
+const upload = multer({ dest: 'uploads/' })
 
 
 
@@ -15,7 +17,11 @@ res.send(camp);
 
 router.route("/")
     .get(catchAsync(campgrounds.index))
-    .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+    //.post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+    .post(upload.array("image"), (req, res) => { // image is the name in the HTML form where the media content will be stored
+        console.log(req.body, req.files);
+        res.send("It worked!!!")
+    })
 
 
 // router.get("/", catchAsync(campgrounds.index));
