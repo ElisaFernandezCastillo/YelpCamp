@@ -5,7 +5,8 @@ const catchAsync = require("../utils/catchAsync");
 const Campground = require("../models/campground");
 const {isLoggedIn, isAuthor, validateCampground} = require("../middleware")
 const multer  = require('multer') // multer is used to be able to parse files that are uploaded via an HTML form
-const upload = multer({ dest: 'uploads/' })
+const {storage} = require("../cloudinary")
+const upload = multer({ storage })
 
 
 

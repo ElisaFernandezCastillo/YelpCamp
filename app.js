@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV !== "production"){
+    // This library reads all the key value pairs that are in the .env file
+    require("dotenv").config();
+}
+
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
