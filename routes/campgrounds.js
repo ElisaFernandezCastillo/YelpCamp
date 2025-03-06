@@ -18,11 +18,7 @@ res.send(camp);
 
 router.route("/")
     .get(catchAsync(campgrounds.index))
-    //.post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
-    .post(upload.array("image"), (req, res) => { // image is the name in the HTML form where the media content will be stored
-        console.log(req.body, req.files);
-        res.send("It worked!!!")
-    })
+    .post(isLoggedIn, upload.array("image"), validateCampground, catchAsync(campgrounds.createCampground))
 
 
 // router.get("/", catchAsync(campgrounds.index));
