@@ -39,6 +39,15 @@
                 <label class="input-group-text" for="inputGroupFile02">Upload</label>
             </div>
             <div class="mb-3">
+                <% campground.images.forEach(function(img, i) { %>
+                    <img src="<%= img.url %>" class="img-thumbnail" alt="">
+                    <div class="form-check-inline">
+                        <input type="checkbox" id="image-<%= i %>" name="deleteImages[]" value="<%= img.filename %>"> <!--Images that are checked will be added to the deleteImages array-->
+                    </div>
+                    <label for="image-<%= i %>">Delete?</label>
+                <% }) %>
+            </div>
+            <div class="mb-3">
                 <button class="btn btn-info">Update campground</button>
             </div>
             
