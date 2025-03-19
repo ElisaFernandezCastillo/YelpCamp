@@ -48,6 +48,9 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateCampground = async (req, res) => {
     const {id} = req.params;
      const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground}) // saving as an object in the EJS file edit.ejs allows us to access the object from the body
+     const imgs = req.files.map(f => ({url: f.path, filename: f.filename}))
+     campground.images.push(...imgs) // using the spread operator to concatenate the arrays
+     await campground.save()
     req.flash("success", "Successfully updated campground!")
     res.redirect(`/campgrounds/${campground._id}`)
 }
