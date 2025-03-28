@@ -1,4 +1,7 @@
 const Campground = require("../models/campground");
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geocoder = mbxGeocoding({accessToken: mapBoxToken});
 const {cloudinary} = require("../cloudinary")
 
 module.exports.index = async (req, res) => {
@@ -14,7 +17,12 @@ module.exports.createCampground = async (req,res, next) => {
     // if(!req.body.campground) throw new ExpressError("Invalid Campground", 400);
     //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing router.use(express.urlencoded)
     // The validations of the objects we recieve are going to be made using the JOI library
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send();
     const campground = new Campground(req.body.campground);
+    campground.geometry = geoData.body.features[0].geometry;
     campground.images = req.files.map(f => ({url: f.path, filename: f.filename}))
     campground.author = req.user._id;
     await campground.save();
