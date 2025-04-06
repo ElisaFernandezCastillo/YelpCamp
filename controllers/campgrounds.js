@@ -1,7 +1,6 @@
 const Campground = require("../models/campground");
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const mapBoxToken = process.env.MAPBOX_TOKEN;
-const geocoder = mbxGeocoding({accessToken: mapBoxToken});
+const maptilerClient = require("@maptiler/client");
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 const {cloudinary} = require("../cloudinary")
 
 module.exports.index = async (req, res) => {
@@ -17,12 +16,9 @@ module.exports.createCampground = async (req,res, next) => {
     // if(!req.body.campground) throw new ExpressError("Invalid Campground", 400);
     //res.send(req.body); //in order for the body to be parsed and transferred, we need to add a library that does the parsing router.use(express.urlencoded)
     // The validations of the objects we recieve are going to be made using the JOI library
-    const geoData = await geocoder.forwardGeocode({
-        query: req.body.campground.location,
-        limit: 1
-    }).send();
+    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
     const campground = new Campground(req.body.campground);
-    campground.geometry = geoData.body.features[0].geometry;
+    campground.geometry = geoData.features[0].geometry;
     campground.images = req.files.map(f => ({url: f.path, filename: f.filename}))
     campground.author = req.user._id;
     await campground.save();
@@ -57,6 +53,8 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateCampground = async (req, res) => {
     const {id} = req.params;
      const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground}) // saving as an object in the EJS file edit.ejs allows us to access the object from the body
+     const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+    campground.geometry = geoData.features[0].geometry;
      const imgs = req.files.map(f => ({url: f.path, filename: f.filename}))
      campground.images.push(...imgs) // using the spread operator to concatenate the arrays
      await campground.save()
