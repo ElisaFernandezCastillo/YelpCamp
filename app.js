@@ -36,11 +36,13 @@ db.once("open", () => {
 
 const app = express();
 const sessionConfig = {
+    name: "session", // change the name of the cookie so that is it harder for hackers to know what that cookie is for
     secret: "thisshouldbeabettersecret!",
     resave: false,
     saveUninitialized: true,
     cookie: {
-        httpOnly: true,
+        httpOnly: true, //cookies are only accesible through HTML and not javascript, which increases security
+        // secure: true, // this means that the cookie will only works through https which is a secure connection
         expires: Date.now() + 1000 * 60 *60 * 24 *7, //this is all in milliseconds
         maxAge: 1000 * 60 *60 * 24 *7
     }
