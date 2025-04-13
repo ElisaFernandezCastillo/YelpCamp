@@ -7,7 +7,7 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const ejsMate = require('ejs-mate');
-const session = require('express-session'); // we are going to use this for authentication and for flashing messages
+// const session = require('express-session'); // we are going to use this for authentication and for flashing messages
 const flash = require("connect-flash");
 const ExpressError = require("./utils/ExpressError")
 const methodOverride = require("method-override");
@@ -17,11 +17,13 @@ const User = require("./models/user")
 const { error } = require("console");
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
+const session = require("express-session")
+const MongoDBStore = require("connect-mongo")
 
 
 const userRoutes = require("./routes/users")
 const campgroundRoutes = require("./routes/campgrounds")
-const reviewRoutes = require("./routes/reviews")
+const reviewRoutes = require("./routes/reviews");
 // const dbUrl = process.env.DB_URL;
 
 const dbUrl = "mongodb://localhost:27017/yelp-camp"
@@ -39,7 +41,19 @@ db.once("open", () => {
 });
 
 const app = express();
+
+const store = MongoDBStore.create({
+    mongoUrl: dbUrl,
+    crypto: { secret: 'thisshouldbeabettersecret!'},
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e){
+    console.log("SESSION STORE ERROR", e);
+})
+
 const sessionConfig = {
+    store,
     name: "session", // change the name of the cookie so that is it harder for hackers to know what that cookie is for
     secret: "thisshouldbeabettersecret!",
     resave: false,
