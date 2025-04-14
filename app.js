@@ -24,9 +24,8 @@ const MongoDBStore = require("connect-mongo")
 const userRoutes = require("./routes/users")
 const campgroundRoutes = require("./routes/campgrounds")
 const reviewRoutes = require("./routes/reviews");
-// const dbUrl = process.env.DB_URL;
 
-const dbUrl = "mongodb://localhost:27017/yelp-camp"
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp"
 
 mongoose.connect(dbUrl, {
     useNewUrlParser: true,
@@ -42,9 +41,11 @@ db.once("open", () => {
 
 const app = express();
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+
 const store = MongoDBStore.create({
     mongoUrl: dbUrl,
-    crypto: { secret: 'thisshouldbeabettersecret!'},
+    crypto: { secret: secret},
     touchAfter: 24 * 60 * 60
 });
 
@@ -55,7 +56,7 @@ store.on("error", function (e){
 const sessionConfig = {
     store,
     name: "session", // change the name of the cookie so that is it harder for hackers to know what that cookie is for
-    secret: "thisshouldbeabettersecret!",
+    secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
